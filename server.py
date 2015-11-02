@@ -14,7 +14,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     Echo server class
     """
     DiccServer = {}
-
     def register2json(self):
         with open("register.json", 'w') as fichero_json:
             json.dump(self.DiccServer, fichero_json)
@@ -28,48 +27,44 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
     def deleteDiccServer(self):
         new_list = []
-        formato = "%Y-%m-%d %H:%M:%S +0000"
-        time_now = time.time()
-        print(time_now)
+        formato = '%Y-%m-%d %H:%M:%S'
         for clave in self.DiccServer:
-            expires = " ".join(self.DiccServer[clave][1].split(" ")[1:])
-            time_now = time.strftime(formato, time.gmtime())
-            if expires <= time_now:
+            time_now = self.DiccServer[clave][1]
+            print(time_now)
+            if time.strptime(time_now, formato) <= time.gmtime(time.time()):
                 new_list.append(clave)
         for usuario in new_list:
             del self.DiccServer[usuario]
 
     def handle(self):
-        """
-        Escribe dirección y puerto del cliente (de tupla client_address)
-        """
-        IP = self.client_address[0]
-        PORT = self.client_address[1]
-        print("IP: ", IP, "PORT: ", PORT)
 
+        IP = self.client_address[0]
+        PORT =  self.client_address[1]
+        print("IP: ", IP, "PORT: ", PORT)
+        if len(self.DiccServer) == 0:
+            self.json2register()
+            self.wfile.write(b"SIP/2.0 200 OK" + b"\r\n" + b"\r\n")
         while 1:
-            """
-            Leyendo línea a línea lo que nos envía el cliente
-            """
+
             line_bytes = self.rfile.read()
             print("El cliente nos manda: \n" + line_bytes.decode('utf-8'))
             line = line_bytes.decode('utf-8')
             if not line:
                 break
             (metodo, address, sip, space, expires) = line.split()
-            if metodo == "REGISTER" and "@" in address:
-                print(expires)
-                time_now = int(time.time()) + int(expires)
-                time_expires = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time_now))
-                print(time_expires)
-                self.DiccServer[address] = ["address: " + str(IP), "expires: " + str(time_expires)]
-                self.deleteDiccServer()
-                self.register2json()
-            if expires == "0":
+            print(metodo)
+            if metodo != "REGISTER" and not "@" in address:
+                break
+            time_now = int(time.time()) + int(expires)
+            time_expires = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time_now))
+            if int(expires) == 0:
                 del self.DiccServer[address]
-                self.register2json()
+            else:
+                self.DiccServer[address] = [str(IP), str(time_expires)]
             print(self.DiccServer)
             self.wfile.write(b"SIP/2.0 200 OK" + b"\r\n" + b"\r\n")
+            self.deleteDiccServer()
+            self.register2json()
 
 if __name__ == "__main__":
     PORT = int(sys.argv[1])
