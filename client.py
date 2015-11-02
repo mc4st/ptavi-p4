@@ -13,7 +13,7 @@ if len(sys.argv) == 6:
     PORT = int(sys.argv[2])
     EXPIRES = int(sys.argv[5])
     metodo = sys.argv[3]
-    if  metodo == 'register':
+    if metodo == 'register':
         ADDRESS = sys.argv[4]
 else:
     sys.exit("Usage: client.py ip puerto register sip_address expires_value")
@@ -27,7 +27,7 @@ METODO = "REGISTER"
 PETICION = METODO + " " + ADDRESS + " " + "SIP/2.0" + "\r\n" + "Expires: " + str(EXPIRES) + "\r\n" + "\r\n"
 print("Enviando: " + PETICION)
 my_socket.send(bytes(PETICION, 'utf-8'))
-data = my_socket.recv(1024) #Tamaño del Buffer 1024
+data = my_socket.recv(1024)
 
 print('Recibido -- ', data.decode('utf-8'))
 print("Terminando socket...")
