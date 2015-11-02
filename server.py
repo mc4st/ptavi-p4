@@ -28,10 +28,11 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             # Si no hay más líneas salimos del bucle infinito
             if not line:
                 break
-            (metodo, address, sip) = line.split()
+            (metodo, address, sip, space, expires) = line.split()
             if metodo == "REGISTER" and "@" in address:
                 self.DiccServer[address] = IP
-            print(self.DiccServer)
+            if expires == "0":
+                del self.DiccServer[address]
             self.wfile.write(b"SIP/2.0 200 OK" + b"\r\n" + b"\r\n")
 
 if __name__ == "__main__":
@@ -40,3 +41,5 @@ if __name__ == "__main__":
     serv = socketserver.UDPServer(('', PORT), SIPRegisterHandler)
     print("Lanzando servidor UDP de eco...")
     serv.allow_reuse_address = True
+    serv.serve_forever()
+    serv.close()
