@@ -24,7 +24,7 @@ my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 my_socket.connect((SERVER, PORT))
 
 METODO = "REGISTER"
-PETICION = METODO + " " + ADDRESS + " " + "SIP/2.0" + "\r\n" + "Expires: " + str(EXPIRES) + "\r\n" + "\r\n"
+PETICION = METODO + " sip:" + ADDRESS + " " + "SIP/2.0" + "\r\n" + "Expires: " + str(EXPIRES) + "\r\n" + "\r\n"
 print("Enviando: " + PETICION)
 my_socket.send(bytes(PETICION, 'utf-8'))
 data = my_socket.recv(1024)
