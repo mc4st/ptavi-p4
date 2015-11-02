@@ -3,7 +3,6 @@
 """
 Clase (y programa principal) para un servidor de eco en UDP simple
 """
-
 import socketserver
 import sys
 
@@ -24,7 +23,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             # Leyendo línea a línea lo que nos envía el cliente
             # self.rfile: abstrae el socket y lee.
             line_bytes = self.rfile.read()
-            print(line_bytes)            
             print("El cliente nos manda: " + line_bytes.decode('utf-8'))
             line = line_bytes.decode('utf-8')
             # Si no hay más líneas salimos del bucle infinito
@@ -41,7 +39,4 @@ if __name__ == "__main__":
     PORT = int(sys.argv[1])
     serv = socketserver.UDPServer(('', PORT), SIPRegisterHandler)
     print("Lanzando servidor UDP de eco...")
-    try:
-        serv.serve_forever()
-    except KeyboardInterrupt:
-        serv.shutdown()
+    serv.allow_reuse_address = True
